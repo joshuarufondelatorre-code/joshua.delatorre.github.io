@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Joshua Dela Torre – AI Video Editor & Content Creator</title>
+
+  <!-- ============================================================
+       FONTS
+       Display: Syne (bold, editorial)
+       Body: DM Sans (clean, modern)
+  ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS VARIABLES – edit these to retheme the whole site
+    ============================================================ */
+    :root {
+      --bg:        #0b0b0d;
+      --bg-2:      #111115;
+      --bg-card:   #16161c;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #f5a623;       /* amber gold */
+      --accent-2:  #ff6b35;       /* warm coral for hover */
+      --text:      #e8e8ec;
+      --muted:     #7a7a8c;
+      --white:     #ffffff;
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+      --radius:    12px;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 300;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+
+    /* ============================================================
+       NOISE TEXTURE OVERLAY
+    ============================================================ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.5;
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+    ============================================================ */
+    h1,h2,h3,h4 { font-family: var(--font-display); line-height: 1.15; color: var(--white); }
+    h1 { font-size: clamp(2.6rem, 7vw, 5.5rem); font-weight: 800; letter-spacing: -0.02em; }
+    h2 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; }
+    h3 { font-size: 1.15rem; font-weight: 600; }
+    p  { color: var(--text); }
+
+    .accent    { color: var(--accent); }
+    .muted     { color: var(--muted); font-size: 0.9rem; }
+    .label {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    /* ============================================================
+       LAYOUT UTILITIES
+    ============================================================ */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 clamp(1.2rem, 5vw, 3rem);
+    }
+    section { padding: clamp(5rem, 10vw, 8rem) 0; }
+    .section-header { max-width: 640px; margin-bottom: 3.5rem; }
+    .section-header p { margin-top: 0.75rem; color: var(--muted); font-size: 1.05rem; }
+
+    /* divider line */
+    .divider {
+      width: 48px; height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin: 1rem 0;
+    }
+
+    /* ============================================================
+       SCROLL REVEAL ANIMATION
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+    /* staggered children */
+    .stagger > * { opacity: 0; transform: translateY(22px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:0s; }
+    .stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:0.1s; }
+    .stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:0.2s; }
+    .stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:0.3s; }
+    .stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:0.4s; }
+    .stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:0.5s; }
+
+    /* ============================================================
+       BUTTONS
+    ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 50px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border: none;
+      transition: var(--transition);
+      letter-spacing: 0.01em;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0b0b0d;
+    }
+    .btn-primary:hover {
+      background: var(--accent-2);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(245,166,35,0.3);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--white);
+      border: 1.5px solid var(--border);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 1.1rem 0;
+      transition: background 0.4s, backdrop-filter 0.4s, padding 0.3s;
+    }
+    nav.scrolled {
+      background: rgba(11,11,13,0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+    .nav-links a {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-cta { display: none; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--white);
+      transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--accent); }
+
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+    }
+    @media (min-width: 769px) {
+      .nav-cta { display: inline-flex; }
+    }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    /* ambient glow */
+    #hero::after {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: -15%;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.25);
+      border-radius: 50px;
+      padding: 0.35rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s ease infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:0.5; transform:scale(1.4); }
+    }
+    .hero-title { margin-bottom: 1.2rem; }
+    .hero-title em {
+      font-style: normal;
+      color: var(--accent);
+      position: relative;
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin-bottom: 2.2rem;
+      line-height: 1.75;
+    }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .hero-stat span {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--white);
+    }
+    .hero-stat p { font-size: 0.8rem; color: var(--muted); }
+
+    /* Profile picture area */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .hero-photo-frame {
+      position: relative;
+      width: clamp(260px, 35vw, 380px);
+    }
+    .hero-photo-frame::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--accent), transparent, rgba(245,166,35,0.3));
+      z-index: 0;
+    }
+    .hero-photo-frame img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      border-radius: 22px;
+      object-fit: cover;
+      aspect-ratio: 4/5;
+      filter: grayscale(20%) contrast(1.05);
+    }
+    /* Decorative floating badge */
+    .hero-badge {
+      position: absolute;
+      bottom: -20px;
+      left: -20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+    .hero-badge .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; animation: pulse 2s infinite; }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; }
+      .hero-sub  { margin: 0 auto 2rem; }
+      .hero-btns { justify-content: center; }
+      .hero-stats { justify-content: center; }
+      .hero-visual { order: -1; }
+      .hero-photo-frame { width: clamp(220px, 60vw, 320px); }
+      .hero-badge { left: 50%; transform: translateX(-50%); bottom: -28px; }
+    }
+
+    /* ============================================================
+       ABOUT
+    ============================================================ */
+    #about { background: var(--bg-2); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .about-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+    .about-card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .about-card h4 {
+      font-size: 1rem;
+      font-family: var(--font-display);
+      margin-bottom: 0.4rem;
+    }
+    .about-card p { font-size: 0.88rem; color: var(--muted); }
+    .about-cards { display: flex; flex-direction: column; gap: 1rem; }
+    .about-text p { margin-bottom: 1rem; color: var(--muted); }
+    .about-text p:first-of-type { color: var(--text); font-size: 1.05rem; }
+
+    @media (max-width: 768px) {
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    /* ============================================================
+       SERVICES
+    ============================================================ */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+    .service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .service-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(245,166,35,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .service-card:hover::before { opacity: 1; }
+    .service-icon {
+      width: 48px; height: 48px;
+      background: rgba(245,166,35,0.1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+    .service-card h3 { margin-bottom: 0.6rem; }
+    .service-card p { font-size: 0.88rem; color: var(--muted); margin-bottom: 1rem; }
+    .service-benefits { list-style: none; }
+    .service-benefits li {
+      font-size: 0.82rem;
+      color: var(--muted);
+      padding: 0.3rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    .service-benefits li::before {
+      content: '→';
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ============================================================
+       PORTFOLIO
+    ============================================================ */
+    #portfolio { background: var(--bg-2); }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .portfolio-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .portfolio-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+      border-color: rgba(245,166,35,0.25);
+    }
+    .portfolio-thumb {
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #1a1a22, #22222e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .portfolio-thumb::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(245,166,35,0.06), transparent);
+    }
+    .play-btn {
+      width: 52px; height: 52px;
+      background: rgba(245,166,35,0.15);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+    .portfolio-item:hover .play-btn {
+      background: var(--accent);
+      color: #0b0b0d;
+      transform: scale(1.1);
+    }
+    .portfolio-label {
+      position: absolute;
+      top: 0.75rem; left: 0.75rem;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(6px);
+      border-radius: 6px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .portfolio-info { padding: 1.2rem 1.4rem; }
+    .portfolio-info h3 { font-size: 1rem; margin-bottom: 0.3rem; }
+    .portfolio-info p  { font-size: 0.82rem; color: var(--muted); }
+
+    .portfolio-cta {
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .portfolio-cta p { color: var(--muted); margin-bottom: 1.2rem; font-size: 0.95rem; }
+
+    /* ============================================================
+       TOOLS
+    ============================================================ */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+    .tool-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: var(--transition);
+    }
+    .tool-pill:hover {
+      border-color: rgba(245,166,35,0.4);
+      transform: translateY(-3px);
+    }
+    .tool-emoji { font-size: 1.5rem; }
+    .tool-name { font-size: 0.85rem; font-weight: 500; color: var(--text); }
+
+    /* ============================================================
+       CONTACT
+    ============================================================ */
+    #contact { background: var(--bg-2); }
+    .contact-wrapper {
+      max-width: 740px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .contact-wrapper h2 { margin-bottom: 1rem; }
+    .contact-wrapper p { color: var(--muted); font-size: 1.05rem; margin-bottom: 2.5rem; }
+    .contact-cards {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .contact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: var(--transition);
+      min-width: 200px;
+    }
+    .contact-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+    .contact-card-icon { font-size: 1.4rem; }
+    .contact-card-info label { display: block; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .contact-card-info span { font-size: 0.9rem; font-weight: 500; }
+    .contact-cta-big {
+      padding: 1rem 2.8rem;
+      font-size: 1rem;
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+    .footer-logo span { color: var(--accent); }
+    .footer-copy { font-size: 0.8rem; color: var(--muted); }
+    .footer-links {
+      display: flex; gap: 1.5rem;
+    }
+    .footer-links a { font-size: 0.82rem; color: var(--muted); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ============================================================
+       SCROLL TO TOP
+    ============================================================ */
+    #scrollTop {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      width: 44px; height: 44px;
+      background: var(--accent);
+      color: #0b0b0d;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: var(--transition);
+      z-index: 500;
+    }
+    #scrollTop.show { opacity: 1; transform: none; }
+    #scrollTop:hover { background: var(--accent-2); transform: translateY(-2px); }
+
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       NAV
+  ============================================================ -->
+  <nav id="navbar">
+    <div class="container nav-inner">
+      <a href="#hero" class="nav-logo">Joshua<span>.</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#portfolio">Portfolio</a></li>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <a href="#contact" class="btn btn-primary nav-cta">Hire Me</a>
+      <div class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about"     onclick="closeMobile()">About</a>
+    <a href="#services"  onclick="closeMobile()">Services</a>
+    <a href="#portfolio" onclick="closeMobile()">Portfolio</a>
+    <a href="#tools"     onclick="closeMobile()">Tools</a>
+    <a href="#contact"   onclick="closeMobile()">Contact</a>
+  </div>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section id="hero">
+    <div class="container">
+      <div class="hero-grid">
+
+        <!-- Text side -->
+        <div class="hero-text">
+          <div class="hero-tag reveal">Available for new projects</div>
+          <h1 class="hero-title reveal">
+            I make content<br>
+            that <em>stops</em><br>
+            the scroll.
+          </h1>
+          <p class="hero-sub reveal">
+            AI-powered video editor and short-form content creator with a proven background in
+            client communication and support. I help brands grow with videos people actually watch.
+          </p>
+          <div class="hero-btns reveal">
+            <a href="#portfolio" class="btn btn-primary">View My Work ↓</a>
+            <a href="#contact"  class="btn btn-outline">Hire Me</a>
+          </div>
+          <div class="hero-stats stagger">
+            <div class="hero-stat">
+              <span>2+</span>
+              <p>Years in client-facing roles</p>
+            </div>
+            <div class="hero-stat">
+              <span>AI</span>
+              <p>Tools mastered</p>
+            </div>
+            <div class="hero-stat">
+              <span>100%</span>
+              <p>Remote-ready</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo side -->
+        <div class="hero-visual reveal">
+          <div class="hero-photo-frame">
+            <!--
+              EDIT: Replace the src below with your actual photo file name
+              e.g. src="joshua.jpg"
+              The photo uploaded is already in black & white which looks great!
+            -->
+            <img
+              src="f1fbb2da-bcc7-47d0-bf14-569410c2accc.jfif"
+              alt="Joshua Dela Torre – AI Video Editor"
+              onerror="this.style.background='#16161c';this.style.aspectRatio='4/5';this.removeAttribute('src');"
+            />
+            <div class="hero-badge">
+              <span class="dot"></span>
+              Open to opportunities
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ABOUT
+  ============================================================ -->
+  <section id="about">
+    <div class="container">
+      <div class="about-grid">
+
+        <div class="about-text reveal">
+          <span class="label">About Me</span>
+          <h2>Built for the digital<br>creator economy.</h2>
+          <div class="divider"></div>
+          <p>
+            I'm Joshua — a virtual assistant, AI video editor, and short-form content creator
+            based in the Philippines. I combine sharp video instincts with real-world experience
+            in customer support to deliver work that's both creative and client-ready.
+          </p>
+          <p>
+            Before going full freelance, I spent over a year as a Customer Service Representative
+            handling travel bookings and healthcare administration. That background gave me
+            something most editors don't have: genuine communication skills, attention to detail,
+            and the discipline to meet deadlines in high-pressure environments.
+          </p>
+          <p>
+            Whether you need a viral Reels cut, a professional AI ad, or reliable admin backup —
+            I get the job done right, the first time.
+          </p>
+          <a href="#contact" class="btn btn-primary" style="margin-top:1.5rem;">Let's Work Together</a>
+        </div>
+
+        <div class="about-cards stagger">
+          <div class="about-card">
+            <div class="about-card-icon">🎬</div>
+            <h4>Video-First Mindset</h4>
+            <p>I understand hooks, pacing, and what keeps viewers watching through to the end.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">🤝</div>
+            <h4>Client Communication</h4>
+            <p>Professional, responsive, and easy to work with. No chasing needed.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">⚡</div>
+            <h4>AI-Powered Workflow</h4>
+            <p>I leverage the latest AI tools to deliver quality work at a faster turnaround.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">🌏</div>
+            <h4>Remote & Timezone-Flexible</h4>
+            <p>Open to US/AU clients. Available for night shift and flexible schedules.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SERVICES
+  ============================================================ -->
+  <section id="services">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">What I Do</span>
+        <h2>Services built to grow your brand</h2>
+        <p>Every deliverable is crafted for results — views, clicks, and conversions.</p>
+      </div>
+      <div class="services-grid stagger">
+
+        <div class="service-card">
+          <div class="service-icon">📱</div>
+          <h3>Short-Form Video Editing</h3>
+          <p>Reels, Shorts, and TikToks that are designed to stop the scroll and drive engagement.</p>
+          <ul class="service-benefits">
+            <li>Punchy hooks & strong CTAs</li>
+            <li>Captions, transitions & effects</li>
+            <li>Optimized for each platform's algorithm</li>
+            <li>Fast 24–48hr turnaround</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🎞️</div>
+          <h3>YouTube Video Editing</h3>
+          <p>Long-form content structured to maximize watch time, retention, and subscriber growth.</p>
+          <ul class="service-benefits">
+            <li>Storytelling-focused editing</li>
+            <li>B-roll, music & color grading</li>
+            <li>Thumbnails & title optimization tips</li>
+            <li>Chapter markers & end screens</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🤖</div>
+          <h3>AI-Generated Video Ads</h3>
+          <p>Faceless, AI-driven video content that looks polished and converts without ever showing a face.</p>
+          <ul class="service-benefits">
+            <li>AI voiceovers via ElevenLabs</li>
+            <li>AI avatars with HeyGen</li>
+            <li>Auto-repurposed with OpusClip</li>
+            <li>Perfect for personal brands & agencies</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🛠️</div>
+          <h3>Virtual Assistant & Admin Support</h3>
+          <p>Reliable back-end support so you can focus on growing — not on the grind.</p>
+          <ul class="service-benefits">
+            <li>Email management & inbox cleanup</li>
+            <li>Travel booking & calendar scheduling</li>
+            <li>Data entry & CRM updates</li>
+            <li>Customer inquiry handling</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PORTFOLIO
+  ============================================================ -->
+  <section id="portfolio">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">My Work</span>
+        <h2>Results you can actually see</h2>
+        <p>A growing collection of short-form, AI, and branded content samples.</p>
+      </div>
+
+      <div class="portfolio-grid stagger">
+
+        <!-- Portfolio item 1 -->
+        <div class="portfolio-item">
+          <div class="portfolio-thumb">
+            <span class="portfolio-label">Short-Form</span>
+            <!--
+              EDIT: To add a real thumbnail, replace the div below with:
+              <img src="thumb1.jpg" alt="Video thumbnail" style="width:100%;height:100%;object-fit:cover;" />
+            -->
+            <div class="play-btn">▶</div>
+          </div>
+          <div class="portfolio-info">
+            <h3>Brand Awareness Reel</h3>
+            <p>Fast-paced short-form edit with captions, transitions, and a strong hook to boost reach.</p>
+          </div>
+        </div>
+
+        <!-- Portfolio item 2 -->
+        <div class="portfolio-item">
+          <div class="portfolio-thumb">
+            <span class="portfolio-label">AI Video Ad</span>
+            <div class="play-btn">▶</div>
+          </div>
+          <div class="portfolio-info">
+            <h3>Faceless Product Ad</h3>
+            <p>AI voiceover + generated visuals — a complete ad produced without a single camera.</p>
+          </div>
+        </div>
+
+        <!-- Portfolio item 3 -->
+        <div class="portfolio-item">
+          <div class="portfolio-thumb">
+            <span class="portfolio-label">YouTube</span>
+            <div class="play-btn">▶</div>
+          </div>
+          <div class="portfolio-info">
+            <h3>Long-Form Edit Sample</h3>
+            <p>Talking-head style with B-roll, lower thirds, and music mixed for maximum retention.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="portfolio-cta reveal">
+        <p>Want to see more? I'll send samples directly to your inbox.</p>
+        <a href="#contact" class="btn btn-primary">Request Sample Work</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       TOOLS
+  ============================================================ -->
+  <section id="tools">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="label">My Toolkit</span>
+        <h2>Tools I work with daily</h2>
+        <p>Staying current with the best tools means better, faster work for you.</p>
+      </div>
+      <div class="tools-grid stagger">
+        <div class="tool-pill"><span class="tool-emoji">🎬</span><span class="tool-name">CapCut Pro</span></div>
+        <div class="tool-pill"><span class="tool-emoji">🗣️</span><span class="tool-name">ElevenLabs</span></div>
+        <div class="tool-pill"><span class="tool-emoji">🧑‍💻</span><span class="tool-name">HeyGen</span></div>
+        <div class="tool-pill"><span class="tool-emoji">🎥</span><span class="tool-name">Veo (Google)</span></div>
+        <div class="tool-pill"><span class="tool-emoji">✂️</span><span class="tool-name">OpusClip</span></div>
+        <div class="tool-pill"><span class="tool-emoji">🤖</span><span class="tool-name">ChatGPT</span></div>
+        <div class="tool-pill"><span class="tool-emoji">✨</span><span class="tool-name">Google Gemini</span></div>
+        <div class="tool-pill"><span class="tool-emoji">📧</span><span class="tool-name">Email & CRM</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONTACT
+  ============================================================ -->
+  <section id="contact">
+    <div class="container">
+      <div class="contact-wrapper reveal">
+        <span class="label">Get In Touch</span>
+        <h2>Ready to create something great?</h2>
+        <p>
+          Whether you need a killer short-form edit, an AI ad, or a reliable VA —
+          I'm ready to help. Let's talk about what you need.
+        </p>
+
+        <div class="contact-cards">
+          <!-- EDIT: Replace with your actual email -->
+          <a href="mailto:joshuadelatorre@email.com" class="contact-card">
+            <span class="contact-card-icon">📧</span>
+            <div class="contact-card-info">
+              <label>Email</label>
+              <span>joshuadelatorre@email.com</span>
+            </div>
+          </a>
+
+          <!-- EDIT: Replace with your actual WhatsApp number -->
+          <a href="https://wa.me/639XXXXXXXXX" target="_blank" class="contact-card">
+            <span class="contact-card-icon">💬</span>
+            <div class="contact-card-info">
+              <label>WhatsApp</label>
+              <span>+63 9XX XXX XXXX</span>
+            </div>
+          </a>
+        </div>
+
+        <a href="mailto:joshuadelatorre@email.com" class="btn btn-primary contact-cta-big">
+          ✉️ &nbsp; Let's Work Together
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-logo">Joshua<span>.</span></div>
+      <p class="footer-copy">© 2025 Joshua Dela Torre. All rights reserved.</p>
+      <nav class="footer-links">
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- Scroll to top -->
+  <button id="scrollTop" aria-label="Scroll to top">↑</button>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script>
+    // ----- Sticky nav scroll effect -----
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+      document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 500);
+    });
+
+    // ----- Scroll to top button -----
+    document.getElementById('scrollTop').addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ----- Hamburger / mobile menu -----
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+      document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    function closeMobile() {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // ----- Scroll reveal (IntersectionObserver) -----
+    const revealEls = document.querySelectorAll('.reveal, .stagger');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // once revealed, stop observing
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    revealEls.forEach(el => observer.observe(el));
+
+    // Trigger hero reveals on load
+    window.addEventListener('load', () => {
+      document.querySelectorAll('#hero .reveal, #hero .stagger').forEach((el, i) => {
+        setTimeout(() => el.classList.add('visible'), i * 120);
+      });
+    });
+  </script>
+
+</body>
+</html>
